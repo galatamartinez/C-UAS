@@ -20,9 +20,9 @@ class MPU6050:
         self.pitch = 0.0
         self.roll = 0.0
 
-    def readWord(self):
-        high = self.bus.read_byte_data(self.address, 0x3B)
-        low = self.bus.read_byte_data(self.address, 0x3C)
+    def readWord(self, adress):
+        high = self.bus.read_byte_data(self.address, adress)
+        low = self.bus.read_byte_data(self.address, adress+1)
         value = (high << 8) + low
 
         if value >= 32768:
@@ -32,19 +32,19 @@ class MPU6050:
     
     def readAngles(self):
         # Read accelerometer data
-        Ax = self.read_word(0x3B)/self.accel_sensitivity
-        Ay = self.read_word(0x3D)/self.accel_sensitivity
-        Az = self.read_word(0x3F)/self.accel_sensitivity
+        Ax = self.readWord(0x3B)/self.accel_sensitivity
+        Ay = self.readWord(0x3D)/self.accel_sensitivity
+        Az = self.readWord(0x3F)/self.accel_sensitivity
 
         # Read gyroscope data
-        Gx = self.read_word(0x43)/self.gyro_sensitivity
-        Gy = self.read_word(0x45)/self.gyro_sensitivity
-        Gz = self.read_word(0x47)/self.gyro_sensitivity
+        Gx = self.readWord(0x43)/self.gyro_sensitivity
+        Gy = self.readWord(0x45)/self.gyro_sensitivity
+        Gz = self.readWord(0x47)/self.gyro_sensitivity
 
         return Ax, Ay, Az, Gx, Gy, Gz
     
     def computeAngles(self):
-        Ax, Ay, Az, Gx, Gy, Gz = self.read_angles()
+        Ax, Ay, Az, Gx, Gy, Gz = self.readAngles()
 
         now = time.time()
         dt = now - self.last_time
@@ -55,8 +55,8 @@ class MPU6050:
         roll_acc = np.arctan2(-Ax,Az) * 180/np.pi
 
         # Calculate pitch and roll from gyroscope
-        self.pitch_gyro += Gx * dt
-        self.roll_gyro += Gy * dt
+        self.pitch_gyro += Gy * dt
+        self.roll_gyro += Gx * dt
 
         # Combine sensor data using complementary filter
         alpha = 0.98

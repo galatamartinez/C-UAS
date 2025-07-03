@@ -23,13 +23,14 @@ class HMC5883L:
 
     def readData(self):
         Mx = self.readAxis(reg_high=0x03, reg_low=0x04)
-        Mz = self.readAxis(reg_high=0x05, reg_low=0x06)
         My = self.readAxis(reg_high=0x07, reg_low=0x08)
+        Mz = self.readAxis(reg_high=0x05, reg_low=0x06)
+        
 
-        return Mx, Mz, My
+        return Mx, My, Mz
     
     def computeYaw(self):
-        Mx,Mz,My = self.readData()
+        Mx,My,Mz = self.readData()
         yaw_rad = np.arctan2(My,Mx) # Radians
         yaw_deg = np.rad2deg(yaw_rad) # Degrees
         yaw = yaw_deg % 360 # Ensure angle is within 0-360º
@@ -38,7 +39,7 @@ class HMC5883L:
     
     def computeYawTiltCompensation(self, pitch, roll):
         # Correct yaw angle with MPU measurements
-        Mx,Mz,My = self.readData()
+        Mx,My,Mz = self.readData()
         Mx_corrected = Mx*np.cos(pitch) + Mz*np.sin(pitch)
         My_corrected = Mx*np.sin(roll)*np.sin(pitch) + My*np.cos(roll) - Mz*np.sin(roll)*np.cos(pitch)
 
