@@ -18,7 +18,7 @@ class Servo:
 
     def calibrate(self):
         # Calibrate the servo to 0 degrees
-        self.set_angle(0)
+        self.setAngle(0)
         time.sleep(1)
 
     def setAngle(self, angle):
